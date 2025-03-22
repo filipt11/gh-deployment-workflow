@@ -1,17 +1,36 @@
 name: Deployment
 
-concurrency:
-  group: production
-  cancel-in-progress: true
-
 on:
   push:
     branches:
       - main
 
 jobs:
-  deployment:
+  deploy:
     runs-on: ubuntu-latest
-    environment: production
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: deploy
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Build website
+        run: |
+          npm install
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist  # Zmień na folder wynikowy
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
